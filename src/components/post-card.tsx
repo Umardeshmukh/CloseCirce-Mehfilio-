@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Post } from '@/lib/data';
 import { getUser } from '@/lib/data';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle, Send } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { Heart, MessageCircle, Send, Clock } from 'lucide-react';
+import { formatDistanceToNow, formatDistance } from 'date-fns';
 import Image from 'next/image';
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,28 @@ export function PostCard({ post }: { post: Post }) {
   const author = getUser(post.authorId);
   const [isLiked, setIsLiked] = useState(post.likes.includes('1')); // Check if current user '1' liked
   const [likesCount, setLikesCount] = useState(post.likes.length);
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (post.expiresAt) {
+      const calculateTimeLeft = () => {
+        const expires = new Date(post.expiresAt!).getTime();
+        const now = new Date().getTime();
+        
+        if (expires > now) {
+          const distance = formatDistance(expires, now);
+          setTimeLeft(`Visible for ${distance}`);
+        } else {
+          setTimeLeft("Expired");
+        }
+      };
+
+      calculateTimeLeft();
+      const interval = setInterval(calculateTimeLeft, 60000); // Update every minute
+
+      return () => clearInterval(interval);
+    }
+  }, [post.expiresAt]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -74,9 +96,16 @@ export function PostCard({ post }: { post: Post }) {
             <span className="text-sm">{post.content}</span>
         </div>
         
-        <p className="text-xs text-muted-foreground uppercase">
-            {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-        </p>
+        {post.expiresAt ? (
+            <div className="flex items-center text-xs text-muted-foreground uppercase">
+                <Clock className="h-3 w-3 mr-1" />
+                <span>{timeLeft}</span>
+            </div>
+        ) : (
+            <p className="text-xs text-muted-foreground uppercase">
+                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+            </p>
+        )}
 
         {post.comments.length > 0 && (
             <p className="text-sm text-muted-foreground font-medium cursor-pointer">
