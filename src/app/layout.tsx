@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
+import { AuthHandler } from '@/components/auth-handler';
 
 export const metadata: Metadata = {
   title: 'CircleShare',
@@ -29,6 +30,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        <AuthHandler />
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
