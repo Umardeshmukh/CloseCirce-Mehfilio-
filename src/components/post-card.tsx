@@ -6,7 +6,7 @@ import { getUser } from '@/lib/data';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { Input } from './ui/input';
@@ -25,25 +25,21 @@ export function PostCard({ post }: { post: Post }) {
   if (!author) return null;
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="rounded-none border-x-0 sm:border-x sm:rounded-lg">
+      <CardHeader className="p-3">
         <div className="flex items-center gap-3">
-          <Avatar>
+          <Avatar className="h-8 w-8">
             <AvatarImage src={author.avatarUrl} alt={author.name} />
             <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">{author.name}</p>
-            <p className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
-            </p>
+            <p className="font-semibold text-sm">{author.name}</p>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <p className="mb-4">{post.content}</p>
+      <CardContent className="p-0">
         {post.imageUrl && (
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+          <div className="relative aspect-square w-full overflow-hidden">
             <Image 
               src={post.imageUrl} 
               alt="Post image" 
@@ -54,23 +50,46 @@ export function PostCard({ post }: { post: Post }) {
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex flex-col items-start gap-4">
-        <div className="flex gap-4">
-          <Button variant="ghost" size="sm" onClick={handleLike} className="flex items-center gap-2">
-            <Heart className={cn("h-5 w-5", isLiked ? "text-red-500 fill-current" : "")}/>
-            <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-2">
-            <MessageCircle className="h-5 w-5"/>
-            <span>{post.comments.length} {post.comments.length === 1 ? 'Comment' : 'Comments'}</span>
-          </Button>
+      <CardFooter className="flex flex-col items-start gap-2 p-3">
+        <div className="w-full flex justify-between items-center">
+            <div className="flex gap-2">
+            <Button variant="ghost" size="icon" onClick={handleLike} className="h-8 w-8">
+                <Heart className={cn("h-6 w-6", isLiked ? "text-red-500 fill-current" : "")}/>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MessageCircle className="h-6 w-6"/>
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Send className="h-6 w-6"/>
+            </Button>
+            </div>
         </div>
+        
+        {likesCount > 0 && (
+            <p className="font-semibold text-sm">{likesCount} {likesCount === 1 ? 'like' : 'likes'}</p>
+        )}
+
+        <div>
+            <span className="font-semibold text-sm mr-2">{author.name}</span>
+            <span className="text-sm">{post.content}</span>
+        </div>
+        
+        <p className="text-xs text-muted-foreground uppercase">
+            {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+        </p>
+
+        {post.comments.length > 0 && (
+            <p className="text-sm text-muted-foreground font-medium cursor-pointer">
+                View all {post.comments.length} comments
+            </p>
+        )}
+
         <div className="w-full flex items-center gap-2">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-6 w-6">
                 <AvatarImage src="https://picsum.photos/seed/user0/200/200" alt="You" />
                 <AvatarFallback>Y</AvatarFallback>
             </Avatar>
-            <Input placeholder="Write a comment..." />
+            <Input placeholder="Add a comment..." className="h-8 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0"/>
         </div>
       </CardFooter>
     </Card>
