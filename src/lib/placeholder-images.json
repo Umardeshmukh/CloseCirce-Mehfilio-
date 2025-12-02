@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-1",
+      "description": "Avatar for Sarah",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1559855603-ce4c8f480d76?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3b21hbiUyMHNtaWxpbmd8ZW58MHx8fHwxNzY0NjUyMDQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman smiling"
+    },
+    {
+      "id": "user-2",
+      "description": "Avatar for Alex",
+      "imageUrl": "https://images.unsplash.com/photo-1687092084146-a2893f0b896a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYW4lMjBnbGFzc2VzfGVufDB8fHx8MTc2NDU5NTQ4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man glasses"
+    },
+    {
+      "id": "user-3",
+      "description": "Avatar for Emily",
+      "imageUrl": "https://images.unsplash.com/photo-1501644898242-cfea317d7faf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3b21hbiUyMG5hdHVyZXxlbnwwfHx8fDE3NjQ2NTUzMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman nature"
+    },
+    {
+      "id": "user-4",
+      "description": "Avatar for David",
+      "imageUrl": "https://images.unsplash.com/photo-1619922804338-b8e6d2ae7b62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBjb2ZmZWV8ZW58MHx8fHwxNzY0NjI1MjQ1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man coffee"
+    },
+    {
+      "id": "post-1",
+      "description": "A beautiful sunset over the ocean",
+      "imageUrl": "https://images.unsplash.com/photo-1674915849034-9c0ae798eb89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzdW5zZXQlMjBvY2VhbnxlbnwwfHx8fDE3NjQ2OTMwMDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sunset ocean"
+    },
+    {
+      "id": "post-2",
+      "description": "A group of friends hiking in the mountains",
+      "imageUrl": "https://images.unsplash.com/photo-1590848047491-df276110685c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmcmllbmRzJTIwaGlraW5nfGVufDB8fHx8MTc2NDY5MzAwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "friends hiking"
+    },
+    {
+      "id": "post-3",
+      "description": "A delicious-looking homemade pizza",
+      "imageUrl": "https://images.unsplash.com/photo-1614936686168-fe496ca37dc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxob21lbWFkZSUyMHBpenphfGVufDB8fHx8MTc2NDY5MzAwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "homemade pizza"
+    },
+    {
+      "id": "post-4",
+      "description": "A city skyline at night",
+      "imageUrl": "https://images.unsplash.com/photo-1531819177115-428566ccfb50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaXR5JTIwbmlnaHR8ZW58MHx8fHwxNzY0Njc1MjAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city night"
+    },
+    {
+      "id": "post-5",
+      "description": "A cute dog playing in a park",
+      "imageUrl": "https://images.unsplash.com/photo-1494947665470-20322015e3a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkb2clMjBwYXJrfGVufDB8fHx8MTc2NDYxNzA1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dog park"
+    }
+  ]
 }
