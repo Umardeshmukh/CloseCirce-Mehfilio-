@@ -47,7 +47,7 @@ service cloud.firestore {
      * This is used to distinguish from anonymous users.
      */
     function isVerifiedUser() {
-      return isSignedIn() && request.auth.token.email != null;
+      return isSignedIn() && request.auth.token.email != null && request.auth.token.email_verified;
     }
 
     /**
@@ -91,7 +91,7 @@ service cloud.firestore {
      * @description Controls access to user profile documents.
      * @path /user_profiles/{email}
      * @allow (get) Any verified user can view another user's profile.
-     * @allow (create) A new user can create their own profile document.
+     * @allow (create) A new user can create their own profile document if their email is verified.
      * @allow (update/delete) A user can only update or delete their own profile.
      * @deny (list) Listing all user profiles is disallowed to prevent scraping.
      * @principle Enforces self-creation and ownership, using email as the unique identifier.
@@ -182,7 +182,7 @@ service cloud.firestore {
       allow list: if isVerifiedUser();
       allow create: if isCircleMember(request.resource.data.circleId)
                       && request.resource.data.inviterId == request.auth.uid;
-      allow update: if isOwnerByEmail(resource.data.inviteeEmail) && resource != null
+      allow update: if (isOwnerByEmail(resource.data.inviteeEmail) || isOwnerByEmail(request.resource.data.inviteeEmail)) && resource != null
                       && request.resource.data.inviterId == resource.data.inviterId
                       && request.resource.data.circleId == resource.data.circleId
                       && request.resource.data.inviteeEmail == resource.data.inviteeEmail;

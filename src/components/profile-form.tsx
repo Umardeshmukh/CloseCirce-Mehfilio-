@@ -9,11 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { getUser } from '@/lib/data';
+import { useUser } from '@/firebase';
+import { adaptFirebaseUser, UserProfile } from '@/lib/data';
 
 const initialState = {
   message: null,
-  blurb: getUser('1')?.blurb || '',
+  blurb: '',
 };
 
 function SubmitButton() {
@@ -27,10 +28,16 @@ function SubmitButton() {
 }
 
 export function ProfileForm() {
-  const [state, formAction] = useFormState(handleGenerateBlurb, initialState);
+  const { user: firebaseUser } = useUser();
+  const user: UserProfile | null = firebaseUser ? adaptFirebaseUser(firebaseUser) : null;
+  
+  const [state, formAction] = useFormState(handleGenerateBlurb, {
+      ...initialState,
+      blurb: user?.blurb || '',
+  });
+
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const user = getUser('1');
 
   useEffect(() => {
     if (state.message && state.message !== 'blurb_generated') {
@@ -78,7 +85,7 @@ export function ProfileForm() {
           readOnly={useFormStatus().pending}
           onChange={(e) => {
             // This is a simple way to update state on manual change, not ideal for a real app
-            initialState.blurb = e.target.value;
+            // A more robust solution would use a state variable for the blurb
           }}
           rows={3}
         />

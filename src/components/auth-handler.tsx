@@ -1,27 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useUser } from '@/firebase';
 import { RegistrationDialog } from './registration-dialog';
+import { Skeleton } from './ui/skeleton';
 
 export function AuthHandler() {
-  const [showRegistration, setShowRegistration] = useState(false);
+  const { user, isUserLoading } = useUser();
 
-  useEffect(() => {
-    // Check if the user has registered before.
-    // In a real app, this would be a proper session check.
-    const hasRegistered = localStorage.getItem('hasRegistered');
-    if (!hasRegistered) {
-      setShowRegistration(true);
-    }
-  }, []);
+  // Show a loading state while Firebase is checking the auth status
+  if (isUserLoading) {
+    return (
+      <div className="fixed inset-0 z-[101] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const handleRegister = () => {
-    // Mark the user as registered.
-    localStorage.setItem('hasRegistered', 'true');
-    setShowRegistration(false);
-    // Here you would typically also update user data, maybe refetch it.
-    window.location.reload(); // Simple way to refresh the app state
-  };
+  // If the user is not logged in after the check, show the registration dialog
+  const showRegistration = !user;
 
-  return <RegistrationDialog open={showRegistration} onRegister={handleRegister} />;
+  return <RegistrationDialog open={showRegistration} />;
 }

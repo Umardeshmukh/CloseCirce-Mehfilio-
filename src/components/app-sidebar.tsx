@@ -24,20 +24,23 @@ import {
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { UserNav } from './user-nav';
-import { getUser } from '@/lib/data';
+import { useUser } from '@/firebase';
+import { adaptFirebaseUser } from '@/lib/data';
 import { CreateCircleDialog } from './create-circle-dialog';
 import { type Circle } from '@/lib/data';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const currentUser = getUser('1'); 
+  const { user: firebaseUser } = useUser();
+  const currentUser = firebaseUser ? adaptFirebaseUser(firebaseUser) : null;
   const [circles, setCircles] = useState<Circle[]>([]);
 
   const handleCreateCircle = (name: string) => {
+    if (!currentUser) return;
     const newCircle = {
         id: `circle-${Date.now()}`,
         name,
-        members: ['1'],
+        members: [currentUser.id],
         posts: []
     }
     setCircles(prev => [...prev, newCircle]);

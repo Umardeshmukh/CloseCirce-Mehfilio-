@@ -1,4 +1,4 @@
-import type { User } from '@/lib/data';
+import type { UserProfile } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -11,8 +11,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { useAuthActions } from '@/firebase/auth/use-auth-actions';
 
-export function UserNav({ user }: { user: User }) {
+
+export function UserNav({ user }: { user: UserProfile }) {
+    const { signOut } = useAuthActions();
+
   return (
     <div className="p-2">
       <DropdownMenu>
@@ -32,9 +36,11 @@ export function UserNav({ user }: { user: User }) {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                @{user.name.toLowerCase().replace(' ', '')}
-              </p>
+              {user.email && (
+                <p className="text-xs leading-none text-muted-foreground">
+                    {user.email}
+                </p>
+              )}
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -47,7 +53,7 @@ export function UserNav({ user }: { user: User }) {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={signOut}>
             Log out
           </DropdownMenuItem>
         </DropdownMenuContent>

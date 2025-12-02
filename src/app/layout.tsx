@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AuthHandler } from '@/components/auth-handler';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'CircleShare',
@@ -30,16 +31,18 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <AuthHandler />
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <div className="min-h-screen">
-              {children}
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-        <Toaster />
+        <FirebaseClientProvider>
+          <AuthHandler />
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <div className="min-h-screen">
+                {children}
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

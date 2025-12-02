@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Post } from '@/lib/data';
-import { getUser } from '@/lib/data';
+import type { Post, UserProfile } from '@/lib/data';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -12,11 +11,26 @@ import Image from 'next/image';
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useUser } from '@/firebase';
+import { adaptFirebaseUser } from '@/lib/data';
+
+// Mock function to get user by ID. Replace with real data fetching.
+const getAuthor = (authorId: string): UserProfile | null => {
+    // In a real app, this would fetch from Firestore, maybe from a cache/context
+    return {
+        id: authorId,
+        name: 'A post author',
+        email: 'author@example.com',
+        avatarUrl: `https://picsum.photos/seed/${authorId}/200/200`,
+    }
+}
 
 export function PostCard({ post }: { post: Post }) {
-  const author = getUser(post.authorId);
-  const currentUser = getUser('1');
-  const [isLiked, setIsLiked] = useState(post.likes.includes('1')); // Check if current user '1' liked
+  const { user: firebaseUser } = useUser();
+  const currentUser = firebaseUser ? adaptFirebaseUser(firebaseUser) : null;
+  const author = getAuthor(post.authorId);
+
+  const [isLiked, setIsLiked] = useState(currentUser && post.likes.includes(currentUser.id)); 
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [timeLeft, setTimeLeft] = useState('');
 
@@ -42,6 +56,7 @@ export function PostCard({ post }: { post: Post }) {
   }, [post.expiresAt]);
 
   const handleLike = () => {
+    if (!currentUser) return;
     setIsLiked(!isLiked);
     setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
   };

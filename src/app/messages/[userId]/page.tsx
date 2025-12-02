@@ -1,6 +1,5 @@
 'use client';
 
-import { getUser } from '@/lib/data';
 import { notFound, useParams } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -9,11 +8,29 @@ import { ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
 import { MotionWrapper } from '@/components/motion-wrapper';
 import { use } from 'react';
+import { useUser } from '@/firebase';
+import { adaptFirebaseUser, UserProfile } from '@/lib/data';
+
+// This is a mock function. Replace with actual data fetching.
+const getOtherUser = (userId: string): UserProfile | undefined => {
+    // In a real app, you would fetch this from Firestore
+    if (userId === 'mock-user-2') {
+        return {
+            id: 'mock-user-2',
+            name: 'Alex',
+            email: 'alex@example.com',
+            avatarUrl: 'https://picsum.photos/seed/user2/200/200'
+        }
+    }
+    return undefined;
+}
+
 
 export default function MessagePage({ params }: { params: { userId: string } }) {
   const { userId } = params;
-  const otherUser = getUser(userId);
-  const currentUser = getUser('1'); // Mock current user
+  const otherUser = getOtherUser(userId);
+  const { user: firebaseUser } = useUser();
+  const currentUser = firebaseUser ? adaptFirebaseUser(firebaseUser) : null;
 
   if (!otherUser) {
     notFound();
@@ -22,7 +39,7 @@ export default function MessagePage({ params }: { params: { userId: string } }) 
   // Mock messages
   const messages = [
     { id: 1, authorId: otherUser.id, text: 'Hey there!' },
-    { id: 2, authorId: '1', text: 'Hi! How are you?' },
+    { id: 2, authorId: currentUser?.id, text: 'Hi! How are you?' },
     { id: 3, authorId: otherUser.id, text: 'Doing great, thanks for asking!' },
   ];
 
@@ -45,10 +62,10 @@ export default function MessagePage({ params }: { params: { userId: string } }) 
           <div
             key={message.id}
             className={`flex items-end gap-2 ${
-              message.authorId === '1' ? 'justify-end' : 'justify-start'
+              message.authorId === currentUser?.id ? 'justify-end' : 'justify-start'
             }`}
           >
-            {message.authorId !== '1' && (
+            {message.authorId !== currentUser?.id && (
               <Avatar className="h-8 w-8">
                 <AvatarImage src={otherUser.avatarUrl} alt={otherUser.name} />
                 <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
@@ -56,14 +73,14 @@ export default function MessagePage({ params }: { params: { userId: string } }) 
             )}
             <div
               className={`max-w-xs rounded-lg px-4 py-2 ${
-                message.authorId === '1'
+                message.authorId === currentUser?.id
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted'
               }`}
             >
               <p>{message.text}</p>
             </div>
-            {message.authorId === '1' && currentUser && (
+            {message.authorId === currentUser?.id && currentUser && (
               <Avatar className="h-8 w-8">
                 <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
                 <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>

@@ -12,15 +12,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useUser } from "@/firebase"
+import { adaptFirebaseUser } from "@/lib/data"
 
 export function CreatePostForm() {
+  const { user: firebaseUser } = useUser();
+  const currentUser = firebaseUser ? adaptFirebaseUser(firebaseUser) : null;
+
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex gap-4">
           <Avatar>
-            <AvatarImage src="https://picsum.photos/seed/user0/200/200" alt="You" />
-            <AvatarFallback>Y</AvatarFallback>
+            <AvatarImage src={currentUser?.avatarUrl} alt={currentUser?.name} />
+            <AvatarFallback>{currentUser?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="w-full">
             <Textarea 
