@@ -1,7 +1,7 @@
 'use client';
 
 import { getUser, users } from '@/lib/data';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,10 @@ import { ArrowLeft, Send } from 'lucide-react';
 import Link from 'next/link';
 import { MotionWrapper } from '@/components/motion-wrapper';
 
-export default function MessagePage({ params }: { params: { userId: string } }) {
-  const otherUser = getUser(params.userId);
+export default function MessagePage() {
+  const params = useParams();
+  const userId = typeof params.userId === 'string' ? params.userId : '';
+  const otherUser = getUser(userId);
   const currentUser = users.find(u => u.id === '1'); // Mock current user
 
   if (!otherUser) {
