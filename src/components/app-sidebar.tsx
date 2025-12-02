@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 
 import {
   Sidebar,
@@ -15,21 +16,32 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
-  CirclePlus,
   Cog,
   MessageSquare,
-  Plus,
   Users,
   Wind,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { circles, users } from '@/lib/data';
 import { UserNav } from './user-nav';
+import { getUser } from '@/lib/data';
+import { CreateCircleDialog } from './create-circle-dialog';
+import { type Circle } from '@/lib/data';
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const currentUser = users.find((u) => u.id === '1'); // Mock current user
+  const currentUser = getUser('1'); 
+  const [circles, setCircles] = useState<Circle[]>([]);
+
+  const handleCreateCircle = (name: string) => {
+    const newCircle = {
+        id: `circle-${Date.now()}`,
+        name,
+        members: ['1'],
+        posts: []
+    }
+    setCircles(prev => [...prev, newCircle]);
+  }
 
   return (
     <Sidebar>
@@ -71,10 +83,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
             ))}
              <SidebarMenuItem>
-                <SidebarMenuButton variant="outline" className="border-dashed">
-                    <CirclePlus className="mr-2" />
-                    Create Circle
-                </SidebarMenuButton>
+                <CreateCircleDialog onCreate={handleCreateCircle} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>

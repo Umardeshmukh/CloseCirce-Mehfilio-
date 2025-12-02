@@ -22,7 +22,7 @@ export function UserNav({ user }: { user: User }) {
               <AvatarImage src={user.avatarUrl} alt={user.name} />
               <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div className="text-left">
+            <div className="text-left hidden group-data-[collapsible=icon]:hidden">
                 <p className="text-sm font-medium">{user.name}</p>
                 <p className="text-xs text-muted-foreground truncate max-w-[100px]">{user.blurb}</p>
             </div>

@@ -15,6 +15,7 @@ import Link from 'next/link';
 
 export function PostCard({ post }: { post: Post }) {
   const author = getUser(post.authorId);
+  const currentUser = getUser('1');
   const [isLiked, setIsLiked] = useState(post.likes.includes('1')); // Check if current user '1' liked
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [timeLeft, setTimeLeft] = useState('');
@@ -45,7 +46,7 @@ export function PostCard({ post }: { post: Post }) {
     setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
   };
   
-  if (!author) return null;
+  if (!author || !currentUser) return null;
 
   return (
     <Card className="rounded-none border-x-0 sm:border-x sm:rounded-lg">
@@ -118,8 +119,8 @@ export function PostCard({ post }: { post: Post }) {
 
         <div className="w-full flex items-center gap-2">
             <Avatar className="h-6 w-6">
-                <AvatarImage src="https://picsum.photos/seed/user0/200/200" alt="You" />
-                <AvatarFallback>Y</AvatarFallback>
+                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <Input placeholder="Add a comment..." className="h-8 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 px-0"/>
         </div>

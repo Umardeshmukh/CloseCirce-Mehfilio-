@@ -1,23 +1,24 @@
-import { circles } from "@/lib/data";
 import { CreatePostForm } from "@/components/create-post-form";
-import { PostCard } from "@/components/post-card";
-import { notFound } from "next/navigation";
 import { MotionWrapper } from "@/components/motion-wrapper";
 import { Button } from "@/components/ui/button";
-import { Link, Share2 } from "lucide-react";
+import { Share2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ManageMembers } from "@/components/manage-members";
+
+// NOTE: This is a temporary solution. We will replace this with a proper data fetching solution later.
+const getCircle = (id: string) => ({ id, name: "My Circle", posts: [] });
 
 export default function CirclePage({ params }: { params: { circleId: string } }) {
-  const circle = circles.find(c => c.id === params.circleId);
-  if (!circle) notFound();
+    const circle = getCircle(params.circleId);
+
 
   // sort posts by expiration date, putting permanent posts at the end
-  const sortedPosts = [...circle.posts].sort((a, b) => {
+  const sortedPosts = [...(circle.posts || [])].sort((a, b) => {
     const now = new Date().getTime();
     
     // Filter out expired posts
@@ -44,23 +45,26 @@ export default function CirclePage({ params }: { params: { circleId: string } })
     <MotionWrapper className="container mx-auto max-w-2xl py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold tracking-tight">{circle.name}</h1>
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon">
-                        <Share2 className="h-4 w-4"/>
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Copy invite link</p>
-                </TooltipContent>
-            </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-2">
+            <ManageMembers />
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="outline" size="icon">
+                            <Share2 className="h-4 w-4"/>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Copy invite link</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
       </div>
       <CreatePostForm />
       <div className="mt-8 space-y-6">
         {sortedPosts.length > 0 ? (
-          sortedPosts.map(post => <PostCard key={post.id} post={post} />)
+          sortedPosts.map(post => <div key={post.id}>Post Card Placeholder</div>)
         ) : (
             <div className="text-center py-16 border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">No posts here yet.</p>

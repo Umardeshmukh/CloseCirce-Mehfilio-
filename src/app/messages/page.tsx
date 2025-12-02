@@ -1,13 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
 import { MotionWrapper } from "@/components/motion-wrapper";
-import { users } from "@/lib/data";
+import { getUsers } from "@/lib/data";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Messages() {
     // Exclude current user from conversation list
-    const otherUsers = users.filter(u => u.id !== '1');
+    const otherUsers = getUsers().filter(u => u.id !== '1');
   return (
     <MotionWrapper className="flex-1 p-4 sm:p-8">
       <div className="flex items-center gap-4 mb-8">
@@ -38,6 +38,9 @@ export default function Messages() {
                     </Link>
                 </li>
             ))}
+             {otherUsers.length === 0 && (
+                <li className="p-4 text-center text-muted-foreground">No conversations yet.</li>
+            )}
           </ul>
         </CardContent>
       </Card>

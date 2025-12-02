@@ -9,11 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { users } from '@/lib/data';
+import { getUser } from '@/lib/data';
 
 const initialState = {
   message: null,
-  blurb: users.find(u => u.id === '1')?.blurb || '',
+  blurb: getUser('1')?.blurb || '',
 };
 
 function SubmitButton() {
@@ -30,7 +30,7 @@ export function ProfileForm() {
   const [state, formAction] = useFormState(handleGenerateBlurb, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const user = users.find(u => u.id === '1');
+  const user = getUser('1');
 
   useEffect(() => {
     if (state.message && state.message !== 'blurb_generated') {
