@@ -1,0 +1,301 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user profile in the CircleShare application.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the user. Serves as the unique identifier.",
+          "format": "email"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "description": "Mobile number of the user.",
+          "format": "string"
+        },
+        "userName": {
+          "type": "string",
+          "description": "The user's display name.",
+          "format": "string"
+        },
+        "profilePicture": {
+          "type": "string",
+          "description": "URL of the user's profile picture.",
+          "format": "uri"
+        },
+        "profileBlurb": {
+          "type": "string",
+          "description": "AI-generated blurb describing the user.",
+          "format": "string"
+        },
+        "circleIds": {
+          "type": "array",
+          "description": "References to circles the user belongs to. (Relationship: UserProfile N:N Circle)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "email",
+        "userName"
+      ]
+    },
+    "Circle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Circle",
+      "type": "object",
+      "description": "Represents a private circle in the CircleShare application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Circle entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the circle."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the circle."
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns the circle. (Relationship: UserProfile 1:N Circle)"
+        },
+        "memberIds": {
+          "type": "array",
+          "description": "References to UserProfiles that are members of the circle. (Relationship: UserProfile N:N Circle)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "ownerId"
+      ]
+    },
+    "Post": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Post",
+      "type": "object",
+      "description": "Represents a post shared within a circle.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Post entity."
+        },
+        "circleId": {
+          "type": "string",
+          "description": "Reference to the Circle the post belongs to. (Relationship: Circle 1:N Post)"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who authored the post. (Relationship: UserProfile 1:N Post)"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the post (text, link to media)."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the post was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "circleId",
+        "authorId",
+        "content",
+        "timestamp"
+      ]
+    },
+    "Comment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Comment",
+      "type": "object",
+      "description": "Represents a comment on a post.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Comment entity."
+        },
+        "postId": {
+          "type": "string",
+          "description": "Reference to the Post the comment belongs to. (Relationship: Post 1:N Comment)"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who authored the comment. (Relationship: UserProfile 1:N Comment)"
+        },
+        "text": {
+          "type": "string",
+          "description": "Content of the comment."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the comment was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "postId",
+        "authorId",
+        "text",
+        "timestamp"
+      ]
+    },
+    "Invite": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Invite",
+      "type": "object",
+      "description": "Represents an invitation to a circle.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Invite entity."
+        },
+        "circleId": {
+          "type": "string",
+          "description": "Reference to the Circle the invite is for. (Relationship: Circle 1:N Invite)"
+        },
+        "inviterId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who sent the invite. (Relationship: UserProfile 1:N Invite)"
+        },
+        "inviteeEmail": {
+          "type": "string",
+          "description": "Email address of the invitee.",
+          "format": "email"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the invite (e.g., pending, accepted, declined)."
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "Expiration date of the invite.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "circleId",
+        "inviterId",
+        "inviteeEmail",
+        "status",
+        "expirationDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/user_profiles/{email}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile information. The document ID is the user's email address. Serves as the primary key.",
+          "params": [
+            {
+              "name": "email",
+              "description": "The email address of the user, serving as the unique identifier."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/circles/{circleId}",
+        "definition": {
+          "entityName": "Circle",
+          "schema": {
+            "$ref": "#/backend/entities/Circle"
+          },
+          "description": "Stores circle information, including the owner and member IDs.",
+          "params": [
+            {
+              "name": "circleId",
+              "description": "The unique identifier of the circle."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/circles/{circleId}/posts/{postId}",
+        "definition": {
+          "entityName": "Post",
+          "schema": {
+            "$ref": "#/backend/entities/Post"
+          },
+          "description": "Stores posts within a circle. Includes denormalized 'circleId' for authorization independence.",
+          "params": [
+            {
+              "name": "circleId",
+              "description": "The unique identifier of the circle."
+            },
+            {
+              "name": "postId",
+              "description": "The unique identifier of the post."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/circles/{circleId}/posts/{postId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Stores comments for a specific post. Nested under the post for easy retrieval.",
+          "params": [
+            {
+              "name": "circleId",
+              "description": "The unique identifier of the circle."
+            },
+            {
+              "name": "postId",
+              "description": "The unique identifier of the post."
+            },
+            {
+              "name": "commentId",
+              "description": "The unique identifier of the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/invites/{inviteId}",
+        "definition": {
+          "entityName": "Invite",
+          "schema": {
+            "$ref": "#/backend/entities/Invite"
+          },
+          "description": "Stores invites to circles. Includes denormalized 'inviteeEmail' for efficient querying of invites.",
+          "params": [
+            {
+              "name": "inviteId",
+              "description": "The unique identifier of the invite."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and debuggability, adhering to the principles of Authorization Independence, Clarity of Intent, DBAC, and QAPs.  Authorization Independence is achieved through denormalization. For example, the `circles/{circleId}/posts/{postId}` collection denormalizes authorization data by including the `circleId`, enabling rules to validate the existence of the circle without requiring a `get()` call. This approach ensures that read and write operations on posts can be authorized independently of the parent circle document, crucial for atomic operations and scalability. Also Invite collection denormalize `inviteeEmail` to allow secure querying of invites.\n\nStructural Segregation is implemented by storing user profiles in `/user_profiles/{email}` collection, ensuring that each document has the same security requirements. This simplifies security rules as there is no need to differentiate between different types of user profiles within the same collection. This segregation helps in maintaining a homogeneous security posture.\n\nAccess Modeling follows consistent patterns. User profiles are stored under `/user_profiles/{email}`, creating path-based ownership for private user data. Circles are stored in the `/circles/{circleId}` collection with `ownerId` and `memberIds`, using the Membership Map pattern for collaborative data. Posts and comments are nested under circles, creating hierarchical paths for user-owned data, such as `/circles/{circleId}/posts/{postId}` and `/circles/{circleId}/posts/{postId}/comments/{commentId}`.\n\nThe design supports QAPs by using structural segregation and membership models. For instance, listing posts within a circle is secured by ensuring that the user is a member of the circle, which can be verified directly through the `circleId` present in the post document. Invites are modeled in a separate collection with the `inviteeEmail` denormalized so they can be efficiently queried, enabling secure list operations.\n\nExplicit State Modeling is encouraged through the use of a single `status` field where applicable, especially for invites. Predictable schema is enforced by avoiding dynamic keys and using arrays of objects with static keys instead. Radical Consistency is maintained through semantic naming conventions, such as always using `ownerId` for ownership and descriptive wildcards like `{circleId}`."
+  }
+}

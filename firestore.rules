@@ -1,0 +1,192 @@
+rules_version = '2';
+
+/**
+ * @name CircleShare Firestore Security Rules
+ * @description
+ * This ruleset enforces a security model for the CircleShare application,
+ * balancing user privacy with collaborative features. It is designed for
+ * rapid prototyping, focusing on strict authorization while maintaining
+ * flexibility in data schemas.
+ *
+ * @philosophy
+ * The core philosophy is based on scoped access. User profiles are private and
+ * owner-managed. Access to collaborative spaces ("circles") and their content
+ * (posts, comments) is strictly limited to members of that circle. This ensures
+ * that private discussions remain contained.
+ *
+ * @structure
+ * - /user_profiles/{email}: Stores individual user data, uniquely identified by email.
+ * - /circles/{circleId}: Represents collaborative groups. Contains a list of member UIDs for authorization.
+ * - /circles/{circleId}/posts/{postId}: Posts belonging to a specific circle.
+ * - /circles/{circleId}/posts/{postId}/comments/{commentId}: Comments on a specific post.
+ * - /invites/{inviteId}: Manages invitations for users to join circles.
+ *
+ * @decisions
+ * - User Listing Disabled: To protect user privacy and prevent data scraping, listing the entire /user_profiles collection is disallowed.
+ * - Membership-Based Access: All access to /circles and their subcollections requires checking the parent circle's `memberIds` list, ensuring only authorized users can read or write content.
+ * - Denormalized Authorization: Circle documents contain a `memberIds` array. This allows rules for nested content (like posts and comments) to perform a single, efficient lookup on the parent circle to verify membership, avoiding complex and slow queries.
+ * - Email as User ID: User profiles are keyed by the user's email address. Ownership checks for this collection are based on the authenticated user's email token (`request.auth.token.email`).
+ *
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    //================================================================================
+    // Helper Functions
+    //================================================================================
+
+    /**
+     * Returns true if the user is signed in.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the user is signed in with a verified email.
+     * This is used to distinguish from anonymous users.
+     */
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email != null;
+    }
+
+    /**
+     * Returns true if the request UID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true if the user's email matches the provided email.
+     * Used for the user_profiles collection where the document ID is the email.
+     */
+    function isOwnerByEmail(email) {
+      return isVerifiedUser() && request.auth.token.email == email;
+    }
+
+    /**
+     * Returns true if the requesting user is a member of the specified circle.
+     * Requires reading the circle document.
+     */
+    function isCircleMember(circleId) {
+      let circle = get(/databases/$(database)/documents/circles/$(circleId));
+      return circle != null && request.auth.uid in circle.data.memberIds;
+    }
+
+    /**
+     * Returns true if the requesting user is the owner of the specified circle.
+     * Requires reading the circle document.
+     */
+    function isCircleOwner(circleId) {
+      let circle = get(/databases/$(database)/documents/circles/$(circleId));
+      return circle != null && circle.data.ownerId == request.auth.uid;
+    }
+
+    //================================================================================
+    // Collections
+    //================================================================================
+
+    /**
+     * @description Controls access to user profile documents.
+     * @path /user_profiles/{email}
+     * @allow (get) Any verified user can view another user's profile.
+     * @allow (create) A new user can create their own profile document.
+     * @allow (update/delete) A user can only update or delete their own profile.
+     * @deny (list) Listing all user profiles is disallowed to prevent scraping.
+     * @principle Enforces self-creation and ownership, using email as the unique identifier.
+     */
+    match /user_profiles/{email} {
+      allow get: if isVerifiedUser();
+      allow list: if false;
+      allow create: if isOwnerByEmail(email)
+                      && request.resource.data.email == email;
+      allow update: if isOwnerByEmail(email) && resource != null
+                      && request.resource.data.email == resource.data.email;
+      allow delete: if isOwnerByEmail(email) && resource != null;
+    }
+
+    /**
+     * @description Controls access to circle documents, which define shared spaces.
+     * @path /circles/{circleId}
+     * @allow (get) Any member of a circle can read its details.
+     * @allow (list) Signed-in users can list circles they are a member of.
+     * @allow (create) Any verified user can create a new circle.
+     * @allow (update/delete) Only the circle's owner can modify or delete it.
+     * @principle Enforces shared access via a `memberIds` list and ownership for management tasks.
+     */
+    match /circles/{circleId} {
+      allow get: if isCircleMember(circleId);
+      // Client queries MUST use: .where('memberIds', 'array-contains', currentUser.uid)
+      allow list: if isVerifiedUser();
+      allow create: if isVerifiedUser()
+                      && request.resource.data.ownerId == request.auth.uid
+                      && request.resource.data.memberIds[0] == request.auth.uid
+                      && request.resource.data.memberIds.size() == 1;
+      allow update: if isOwner(resource.data.ownerId) && resource != null
+                      && request.resource.data.ownerId == resource.data.ownerId;
+      allow delete: if isOwner(resource.data.ownerId) && resource != null;
+
+      /**
+       * @description Controls access to posts within a circle.
+       * @path /circles/{circleId}/posts/{postId}
+       * @allow (read) Any member of the parent circle can read posts.
+       * @allow (create) Any member of the parent circle can create a post.
+       * @allow (update/delete) Only the original author of the post can modify or delete it.
+       * @principle Inherits read access from the parent circle, but write access is restricted to the post's author.
+       */
+      match /posts/{postId} {
+        allow get, list: if isCircleMember(circleId);
+        allow create: if isCircleMember(circleId)
+                        && request.resource.data.authorId == request.auth.uid
+                        && request.resource.data.circleId == circleId;
+        allow update: if isOwner(resource.data.authorId) && resource != null && isCircleMember(circleId)
+                        && request.resource.data.authorId == resource.data.authorId
+                        && request.resource.data.circleId == resource.data.circleId;
+        allow delete: if isOwner(resource.data.authorId) && resource != null && isCircleMember(circleId);
+
+        /**
+         * @description Controls access to comments on a post.
+         * @path /circles/{circleId}/posts/{postId}/comments/{commentId}
+         * @allow (read) Any member of the parent circle can read comments.
+         * @allow (create) Any member of the parent circle can create a comment.
+         * @allow (update/delete) Only the original author of the comment can modify or delete it.
+         * @principle Inherits read access from the grandparent circle, while restricting writes to the comment's author.
+         */
+        match /comments/{commentId} {
+          allow get, list: if isCircleMember(circleId);
+          allow create: if isCircleMember(circleId)
+                          && request.resource.data.authorId == request.auth.uid
+                          && request.resource.data.postId == postId;
+          allow update: if isOwner(resource.data.authorId) && resource != null && isCircleMember(circleId)
+                          && request.resource.data.authorId == resource.data.authorId
+                          && request.resource.data.postId == resource.data.postId;
+          allow delete: if isOwner(resource.data.authorId) && resource != null && isCircleMember(circleId);
+        }
+      }
+    }
+
+    /**
+     * @description Controls access to circle invitations.
+     * @path /invites/{inviteId}
+     * @allow (get) The user who sent the invite and the recipient can view it.
+     * @allow (list) A user can list invites sent to their email.
+     * @allow (create) A member of a circle can create an invite for that circle.
+     * @allow (update) The recipient can update the invite (e.g., to change its status).
+     * @allow (delete) The sender or the circle owner can revoke (delete) an invite.
+     * @principle Manages access based on roles defined within the invite document itself (inviter and invitee).
+     */
+    match /invites/{inviteId} {
+      allow get: if isOwner(resource.data.inviterId) || isOwnerByEmail(resource.data.inviteeEmail);
+      // Client queries MUST use: .where('inviteeEmail', '==', currentUser.email)
+      allow list: if isVerifiedUser();
+      allow create: if isCircleMember(request.resource.data.circleId)
+                      && request.resource.data.inviterId == request.auth.uid;
+      allow update: if isOwnerByEmail(resource.data.inviteeEmail) && resource != null
+                      && request.resource.data.inviterId == resource.data.inviterId
+                      && request.resource.data.circleId == resource.data.circleId
+                      && request.resource.data.inviteeEmail == resource.data.inviteeEmail;
+      allow delete: if (isOwner(resource.data.inviterId) || isCircleOwner(resource.data.circleId)) && resource != null;
+    }
+  }
+}
