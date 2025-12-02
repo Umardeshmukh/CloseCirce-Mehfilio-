@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import {
   CirclePlus,
   Cog,
+  MessageSquare,
   Plus,
   Users,
   Wind,
@@ -44,6 +45,15 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith('/messages')}>
+                    <Link href="/messages"><MessageSquare />Messages</Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center">
             <Users className="mr-2" />

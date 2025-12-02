@@ -11,6 +11,7 @@ import { formatDistanceToNow, formatDistance } from 'date-fns';
 import Image from 'next/image';
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function PostCard({ post }: { post: Post }) {
   const author = getUser(post.authorId);
@@ -81,8 +82,10 @@ export function PostCard({ post }: { post: Post }) {
             <Button variant="ghost" size="icon" className="h-8 w-8">
                 <MessageCircle className="h-6 w-6"/>
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" asChild className="h-8 w-8">
+              <Link href={`/messages/${post.authorId}`}>
                 <Send className="h-6 w-6"/>
+              </Link>
             </Button>
             </div>
         </div>
