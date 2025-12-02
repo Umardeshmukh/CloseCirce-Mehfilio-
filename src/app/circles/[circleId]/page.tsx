@@ -16,8 +16,29 @@ export default function CirclePage({ params }: { params: { circleId: string } })
   const circle = circles.find(c => c.id === params.circleId);
   if (!circle) notFound();
 
-  // sort posts chronologically
-  const sortedPosts = [...circle.posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  // sort posts by expiration date, putting permanent posts at the end
+  const sortedPosts = [...circle.posts].sort((a, b) => {
+    const now = new Date().getTime();
+    
+    // Filter out expired posts
+    const aIsExpired = a.expiresAt && new Date(a.expiresAt).getTime() < now;
+    const bIsExpired = b.expiresAt && new Date(b.expiresAt).getTime() < now;
+
+    if (aIsExpired && !bIsExpired) return 1;
+    if (!aIsExpired && bIsExpired) return -1;
+    if (aIsExpired && bIsExpired) return 0;
+
+
+    const aTime = a.expiresAt ? new Date(a.expiresAt).getTime() : Infinity;
+    const bTime = b.expiresAt ? new Date(b.expiresAt).getTime() : Infinity;
+    
+    if (aTime === Infinity && bTime === Infinity) {
+      // If both are permanent, sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    
+    return aTime - bTime;
+  });
 
   return (
     <MotionWrapper className="container mx-auto max-w-2xl py-8 px-4">

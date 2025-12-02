@@ -19,6 +19,7 @@ export type Post = {
   content: string;
   imageUrl?: string;
   createdAt: string;
+  expiresAt: string | null; // null means it never expires
   likes: string[];
   comments: Comment[];
 };
@@ -49,6 +50,7 @@ export const circles: Circle[] = [
         content: 'Beautiful sunset today! 🌅',
         imageUrl: 'https://picsum.photos/seed/post1/600/400',
         createdAt: '2024-07-29T18:30:00Z',
+        expiresAt: '2024-07-30T18:30:00Z', // Expires 24 hours after creation
         likes: ['1', '3'],
         comments: [
           { id: 'comment-1', authorId: '3', text: 'Wow, stunning!', createdAt: '2024-07-29T18:35:00Z' },
@@ -60,6 +62,7 @@ export const circles: Circle[] = [
         content: 'Had a great time hiking this weekend. ⛰️',
         imageUrl: 'https://picsum.photos/seed/post2/600/400',
         createdAt: '2024-07-28T12:00:00Z',
+        expiresAt: null, // Never expires
         likes: ['2'],
         comments: [],
       },
@@ -76,6 +79,7 @@ export const circles: Circle[] = [
         content: 'My attempt at homemade pizza. 🍕',
         imageUrl: 'https://picsum.photos/seed/post3/600/400',
         createdAt: '2024-07-27T20:00:00Z',
+        expiresAt: '2024-08-03T20:00:00Z', // Expires 1 week after creation
         likes: ['1'],
         comments: [],
       },
@@ -92,6 +96,7 @@ export const circles: Circle[] = [
             content: 'The city looks so different at night.',
             imageUrl: 'https://picsum.photos/seed/post4/600/400',
             createdAt: '2024-07-26T22:15:00Z',
+            expiresAt: null, // Never expires
             likes: [],
             comments: [],
         }
